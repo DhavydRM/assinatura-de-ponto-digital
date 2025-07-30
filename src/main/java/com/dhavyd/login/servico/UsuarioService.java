@@ -23,4 +23,26 @@ public class UsuarioService {
     public Usuario buscarPorId(Long id) {
         return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontrado("id"));
     }
+
+    public Usuario inserir(Usuario usuario) {
+        return repository.save(usuario);
+    }
+
+    public void deletar(Long id) {
+        repository.deleteById(id);
+    }
+
+    public Usuario atualizar(Long id, Usuario usuario) {
+        Usuario user = repository.getReferenceById(id);
+        atualizarUsuario(user, usuario);
+        return repository.save(user);
+    }
+
+    private void atualizarUsuario(Usuario user, Usuario usuario) {
+        user.setNome(usuario.getNome());
+        user.setEmail(usuario.getEmail());
+        user.setSenha(usuario.getSenha());
+    }
+
+    
 }
