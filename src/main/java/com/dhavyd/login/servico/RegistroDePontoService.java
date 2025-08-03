@@ -1,6 +1,8 @@
 package com.dhavyd.login.servico;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,21 @@ public class RegistroDePontoService {
         return usuario.getRegistroDePontos();
     }
 
+    public RegistroDePonto buscarPorUsuarioIdAndData(Long usuarioId, LocalDate hoje) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("id"));
+        RegistroDePonto registro = null;
+        ZoneId zoneId = ZoneId.systemDefault();
+
+        for (RegistroDePonto x : usuario.getRegistroDePontos()) {
+            LocalDate ld = x.getEntrada().atZone(zoneId).toLocalDate();
+            if (ld.equals(hoje)) {
+                registro = new RegistroDePonto(x.getId(), x.getUsuario(), x.getEntrada(), x.getSaida());
+                return registro;
+            }   
+        }
+        return null;
+    }
+
     public RegistroDePonto marcarEntrada(RegistroDePonto registro) {
         registro.setEntrada(Instant.now());
         return repository.save(registro);
@@ -61,5 +78,13 @@ public class RegistroDePontoService {
         registro.setSaida(novosDados.getSaida());
     }
 
-    
+    public boolean isPresent(Long usuarioId, Instant date) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
+        for (RegistroDePonto x : usuario.getRegistroDePontos()) {
+            if (date.equals(x.getEntrada())) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

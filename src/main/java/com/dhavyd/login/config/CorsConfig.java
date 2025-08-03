@@ -12,9 +12,9 @@ public class CorsConfig {
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(    CorsRegistry registry) {
+            public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // libera todos os endpoints
-                        .allowedOrigins("*") // origem do seu front
+                        .allowedOrigins("*") // origem do front
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // métodos liberados
                         .allowedHeaders("*"); // cabeçalhos liberados
             }

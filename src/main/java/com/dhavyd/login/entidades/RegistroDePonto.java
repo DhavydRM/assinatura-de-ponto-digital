@@ -2,6 +2,10 @@ package com.dhavyd.login.entidades;
 
 import java.time.Instant;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.dhavyd.login.servico.UsuarioService;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,7 +20,7 @@ public class RegistroDePonto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
@@ -30,6 +34,13 @@ public class RegistroDePonto {
         this.id = id;
         this.usuario = usuario;
         this.entrada = entrada;
+    }
+
+    public RegistroDePonto(Long id, Usuario usuario, Instant entrada, Instant saida) {
+        this.id = id;
+        this.usuario = usuario;
+        this.entrada = entrada;
+        this.saida = saida;
     }
 
     public Long getId() {

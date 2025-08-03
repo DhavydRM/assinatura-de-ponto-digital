@@ -1,6 +1,7 @@
 package com.dhavyd.login.recursos;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,24 +46,41 @@ public class RegistroDePontoResource {
         return ResponseEntity.ok().body(registroDePonto);
     }
 
-    @GetMapping(value = "usuario/{id}")
+    @GetMapping(value = "usuario/{usuarioId}")
     public ResponseEntity<List<RegistroDePonto>> buscarPorIdUsario(@PathVariable Long id) throws Exception {
         List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id);
         return ResponseEntity.ok().body(registroDePonto);
     }
 
-    @PostMapping(value = "/entrada/{id}")
-    public ResponseEntity<RegistroDePonto> marcarEntrada(@PathVariable Long id) {
-        Usuario user = usuarioService.buscarPorId(id);
+    @GetMapping("/hoje/{usuarioId}")
+    public ResponseEntity<RegistroDePonto> buscarPontoDeHoje(@PathVariable Long usuarioId) {
+        LocalDate hoje = LocalDate.now();
+        RegistroDePonto registroDoDia = service.buscarPorUsuarioIdAndData(usuarioId, hoje);
+    
+        return ResponseEntity.ok().body(registroDoDia);
+}
+
+    @PostMapping(value = "/entrada/{usuarioId}")
+    public ResponseEntity<RegistroDePonto> marcarEntrada(@PathVariable Long usuarioId) {
+        Usuario user = usuarioService.buscarPorId(usuarioId);
+
+        RegistroDePonto registroExistente = service.buscarPorUsuarioIdAndData(usuarioId, LocalDate.now());
+
+        if (registroExistente != null) {
+            if (service.isPresent(usuarioId, registroExistente.getEntrada()) && registroExistente.getEntrada() != null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+        }
+
         RegistroDePonto registroDePonto = service.marcarEntrada(new RegistroDePonto(null, user, null));
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(registroDePonto.getId()).toUri();
         return ResponseEntity.created(uri).body(registroDePonto);
     }
 
-    @PostMapping(value = "/saida/{id}")
-    public ResponseEntity<RegistroDePonto> marcarSaida(@PathVariable Long id) {
-        Usuario user = usuarioService.buscarPorId(id);
+    @PostMapping(value = "/saida/{usuarioId}")
+    public ResponseEntity<RegistroDePonto> marcarSaida(@PathVariable Long usuarioId) {
+        Usuario user = usuarioService.buscarPorId(usuarioId);
         RegistroDePonto registroDePonto = service.marcarSaida(user.getRegistroDePontos());
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(registroDePonto.getId()).toUri();
