@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 @RestController // Identifica que aqui é o controlador da API(Faz a comunicação direta com o front)
-@RequestMapping(value = "/registro") // Adiciona o endpoint pela qual os metodos serão chamados
+@RequestMapping(value = "/registros") // Adiciona o endpoint pela qual os metodos serão chamados
 public class RegistroDePontoResource {
     
     @Autowired
@@ -75,9 +75,9 @@ public class RegistroDePontoResource {
         return ResponseEntity.noContent().build();
     }
 
-    /*@PutMapping(value = "/{id}")
+    @PutMapping(value = "/{id}")
     public ResponseEntity<RegistroDePonto> atualizar(@PathVariable Long id, @RequestBody RegistroDePonto RegistroDePonto) {
-        RegistroDePonto = service.atualizarRegistro(id, RegistroDePonto);
+        RegistroDePonto = service.atualizarResgistro(id, RegistroDePonto);
         return ResponseEntity.ok().body(RegistroDePonto);
-    }*/
+    }
 }

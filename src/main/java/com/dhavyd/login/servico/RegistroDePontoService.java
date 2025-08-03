@@ -50,15 +50,16 @@ public class RegistroDePontoService {
         repository.deleteById(id);
     }
 
-    /*public RegistroDePonto atualizarRegistro(Long id, RegistroDePonto novosDados) {
+    public RegistroDePonto atualizarResgistro(Long id, RegistroDePonto novosDados) {
         RegistroDePonto registro = repository.getReferenceById(id);
         atualizarRegistroDePonto(registro, novosDados);
         return repository.save(registro);
     }
 
     private void atualizarRegistroDePonto(RegistroDePonto registro, RegistroDePonto novosDados) {
-        registro.setRegistro(novosDados.getRegistro());
-    }*/
+        registro.setEntrada(novosDados.getEntrada());
+        registro.setSaida(novosDados.getSaida());
+    }
 
     
 }
