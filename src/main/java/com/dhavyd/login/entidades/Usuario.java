@@ -1,11 +1,15 @@
 package com.dhavyd.login.entidades;
 
 import java.io.Serializable;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Usuario implements Serializable{
@@ -17,14 +21,19 @@ public class Usuario implements Serializable{
     private String email;
     private String senha;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "usuario")
+    private List<RegistroDePonto> registroDePontos;
+
     public Usuario(){
     }
 
-    public Usuario(Long id, String nome, String email, String senha) {
+    public Usuario(Long id, String nome, String email, String senha, List<RegistroDePonto> registrosDePontos) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
+        this.registroDePontos = registrosDePontos;
     }
 
     public Long getId() {
@@ -57,6 +66,10 @@ public class Usuario implements Serializable{
 
     public void setSenha(String senha) {
         this.senha = senha;
+    }
+
+    public List<RegistroDePonto> getRegistroDePontos() {
+        return registroDePontos;
     }
 
     @Override
