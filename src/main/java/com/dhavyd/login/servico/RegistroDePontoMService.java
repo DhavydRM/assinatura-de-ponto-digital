@@ -8,57 +8,57 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.dhavyd.login.entidades.RegistroDePonto;
+import com.dhavyd.login.entidades.RegistroDePontoM;
 import com.dhavyd.login.entidades.Usuario;
-import com.dhavyd.login.repositorios.RegistroDePontoRepository;
+import com.dhavyd.login.repositorios.RegistroDePontoMRepository;
 import com.dhavyd.login.repositorios.UsuarioRepository;
 import com.dhavyd.login.servico.execoes.RecursoNaoEncontrado;
 
 @Service
-public class RegistroDePontoService {
+public class RegistroDePontoMService {
     
     @Autowired
-    private RegistroDePontoRepository repository;
+    private RegistroDePontoMRepository repository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<RegistroDePonto> buscarTodos() {
+    public List<RegistroDePontoM> buscarTodos() {
         return repository.findAll();
     }
 
-    public RegistroDePonto buscarPorId(Long id) throws Exception {
-        RegistroDePonto registro = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
+    public RegistroDePontoM buscarPorId(Long id) throws Exception {
+        RegistroDePontoM registro = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
         return registro;
     }
 
-    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario) {
+    public List<RegistroDePontoM> buscarPorIdUsuario(Long idUsuario) {
         Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new RecursoNaoEncontrado("Usuário sem horas registradas!"));
-        return usuario.getRegistroDePontos();
+        return usuario.getRegistroDePontosM();
     }
 
-    public RegistroDePonto buscarPorUsuarioIdAndData(Long usuarioId, LocalDate hoje) {
+    public RegistroDePontoM buscarPorUsuarioIdAndData(Long usuarioId, LocalDate hoje) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("id"));
-        RegistroDePonto registro = null;
+        RegistroDePontoM registro = null;
         ZoneId zoneId = ZoneId.systemDefault();
 
-        for (RegistroDePonto x : usuario.getRegistroDePontos()) {
+        for (RegistroDePontoM x : usuario.getRegistroDePontosM()) {
             LocalDate ld = x.getEntrada().atZone(zoneId).toLocalDate();
             if (ld.equals(hoje)) {
-                registro = new RegistroDePonto(x.getId(), x.getUsuario(), x.getEntrada(), x.getSaida());
+                registro = new RegistroDePontoM(x.getId(), x.getUsuario(), x.getEntrada(), x.getSaida());
                 return registro;
             }   
         }
         return null;
     }
 
-    public RegistroDePonto marcarEntrada(RegistroDePonto registro) {
+    public RegistroDePontoM marcarEntrada(RegistroDePontoM registro) {
         registro.setEntrada(Instant.now());
         return repository.save(registro);
     }
 
-    public RegistroDePonto marcarSaida(List<RegistroDePonto> registros) {
-        RegistroDePonto ultimoRegistro = registros.get(registros.size() - 1);
+    public RegistroDePontoM marcarSaida(List<RegistroDePontoM> registros) {
+        RegistroDePontoM ultimoRegistro = registros.get(registros.size() - 1);
         ultimoRegistro.setSaida(Instant.now());
         return repository.save(ultimoRegistro);
     }
@@ -67,20 +67,20 @@ public class RegistroDePontoService {
         repository.deleteById(id);
     }
 
-    public RegistroDePonto atualizarResgistro(Long id, RegistroDePonto novosDados) {
-        RegistroDePonto registro = repository.getReferenceById(id);
+    public RegistroDePontoM atualizarResgistro(Long id, RegistroDePontoM novosDados) {
+        RegistroDePontoM registro = repository.getReferenceById(id);
         atualizarRegistroDePonto(registro, novosDados);
         return repository.save(registro);
     }
 
-    private void atualizarRegistroDePonto(RegistroDePonto registro, RegistroDePonto novosDados) {
+    private void atualizarRegistroDePonto(RegistroDePontoM registro, RegistroDePontoM novosDados) {
         registro.setEntrada(novosDados.getEntrada());
         registro.setSaida(novosDados.getSaida());
     }
 
     public boolean isPresent(Long usuarioId, Instant date) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
-        for (RegistroDePonto x : usuario.getRegistroDePontos()) {
+        for (RegistroDePontoM x : usuario.getRegistroDePontosM()) {
             if (date.equals(x.getEntrada())) {
                 return true;
             }

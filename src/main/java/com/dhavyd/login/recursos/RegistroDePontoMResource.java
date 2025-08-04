@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.dhavyd.login.entidades.RegistroDePonto;
+import com.dhavyd.login.entidades.RegistroDePontoM;
 import com.dhavyd.login.entidades.Usuario;
-import com.dhavyd.login.servico.RegistroDePontoService;
+import com.dhavyd.login.servico.RegistroDePontoMService;
 import com.dhavyd.login.servico.UsuarioService;
 
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,46 +25,46 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 @RestController // Identifica que aqui é o controlador da API(Faz a comunicação direta com o front)
-@RequestMapping(value = "/registros") // Adiciona o endpoint pela qual os metodos serão chamados
-public class RegistroDePontoResource {
+@RequestMapping(value = "/registros/manha") // Adiciona o endpoint pela qual os metodos serão chamados
+public class RegistroDePontoMResource {
     
     @Autowired
-    private RegistroDePontoService service;
+    private RegistroDePontoMService service;
 
     @Autowired
     private UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<List<RegistroDePonto>> buscarTodos() { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<RegistroDePonto> registroDePontos = service.buscarTodos();
+    public ResponseEntity<List<RegistroDePontoM>> buscarTodos() { // ResponseEntity é a classe responsavel por todas as requisições HTTP
+        List<RegistroDePontoM> registroDePontos = service.buscarTodos();
         return ResponseEntity.ok().body(registroDePontos); // Retorna um JSON listando os RegistroDePontos no Body
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<RegistroDePonto> buscarPorId(@PathVariable Long id) throws Exception {
-        RegistroDePonto registroDePonto = service.buscarPorId(id);
+    public ResponseEntity<RegistroDePontoM> buscarPorId(@PathVariable Long id) throws Exception {
+        RegistroDePontoM registroDePonto = service.buscarPorId(id);
         return ResponseEntity.ok().body(registroDePonto);
     }
 
     @GetMapping(value = "usuario/{usuarioId}")
-    public ResponseEntity<List<RegistroDePonto>> buscarPorIdUsario(@PathVariable Long id) throws Exception {
-        List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id);
+    public ResponseEntity<List<RegistroDePontoM>> buscarPorIdUsario(@PathVariable Long id) throws Exception {
+        List<RegistroDePontoM> registroDePonto = service.buscarPorIdUsuario(id);
         return ResponseEntity.ok().body(registroDePonto);
     }
 
     @GetMapping("/hoje/{usuarioId}")
-    public ResponseEntity<RegistroDePonto> buscarPontoDeHoje(@PathVariable Long usuarioId) {
+    public ResponseEntity<RegistroDePontoM> buscarPontoDeHoje(@PathVariable Long usuarioId) {
         LocalDate hoje = LocalDate.now();
-        RegistroDePonto registroDoDia = service.buscarPorUsuarioIdAndData(usuarioId, hoje);
+        RegistroDePontoM registroDoDia = service.buscarPorUsuarioIdAndData(usuarioId, hoje);
     
         return ResponseEntity.ok().body(registroDoDia);
 }
 
     @PostMapping(value = "/entrada/{usuarioId}")
-    public ResponseEntity<RegistroDePonto> marcarEntrada(@PathVariable Long usuarioId) {
+    public ResponseEntity<RegistroDePontoM> marcarEntrada(@PathVariable Long usuarioId) {
         Usuario user = usuarioService.buscarPorId(usuarioId);
 
-        RegistroDePonto registroExistente = service.buscarPorUsuarioIdAndData(usuarioId, LocalDate.now());
+        RegistroDePontoM registroExistente = service.buscarPorUsuarioIdAndData(usuarioId, LocalDate.now());
 
         if (registroExistente != null) {
             if (service.isPresent(usuarioId, registroExistente.getEntrada()) && registroExistente.getEntrada() != null) {
@@ -72,16 +72,16 @@ public class RegistroDePontoResource {
             }
         }
 
-        RegistroDePonto registroDePonto = service.marcarEntrada(new RegistroDePonto(null, user, null));
+        RegistroDePontoM registroDePonto = service.marcarEntrada(new RegistroDePontoM(null, user, null));
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(registroDePonto.getId()).toUri();
         return ResponseEntity.created(uri).body(registroDePonto);
     }
 
     @PostMapping(value = "/saida/{usuarioId}")
-    public ResponseEntity<RegistroDePonto> marcarSaida(@PathVariable Long usuarioId) {
+    public ResponseEntity<RegistroDePontoM> marcarSaida(@PathVariable Long usuarioId) {
         Usuario user = usuarioService.buscarPorId(usuarioId);
-        RegistroDePonto registroDePonto = service.marcarSaida(user.getRegistroDePontos());
+        RegistroDePontoM registroDePonto = service.marcarSaida(user.getRegistroDePontosM());
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(registroDePonto.getId()).toUri();
         return ResponseEntity.created(uri).body(registroDePonto);
@@ -94,7 +94,7 @@ public class RegistroDePontoResource {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<RegistroDePonto> atualizar(@PathVariable Long id, @RequestBody RegistroDePonto RegistroDePonto) {
+    public ResponseEntity<RegistroDePontoM> atualizar(@PathVariable Long id, @RequestBody RegistroDePontoM RegistroDePonto) {
         RegistroDePonto = service.atualizarResgistro(id, RegistroDePonto);
         return ResponseEntity.ok().body(RegistroDePonto);
     }

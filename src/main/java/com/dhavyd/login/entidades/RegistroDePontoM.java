@@ -2,10 +2,6 @@ package com.dhavyd.login.entidades;
 
 import java.time.Instant;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.dhavyd.login.servico.UsuarioService;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
-public class RegistroDePonto {
+public class RegistroDePontoM {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,16 +23,16 @@ public class RegistroDePonto {
     private Instant entrada;
     private Instant saida;
 
-    public RegistroDePonto() {
+    public RegistroDePontoM() {
     }
 
-    public RegistroDePonto(Long id, Usuario usuario, Instant entrada) {
+    public RegistroDePontoM(Long id, Usuario usuario, Instant entrada) {
         this.id = id;
         this.usuario = usuario;
         this.entrada = entrada;
     }
 
-    public RegistroDePonto(Long id, Usuario usuario, Instant entrada, Instant saida) {
+    public RegistroDePontoM(Long id, Usuario usuario, Instant entrada, Instant saida) {
         this.id = id;
         this.usuario = usuario;
         this.entrada = entrada;
@@ -91,7 +87,7 @@ public class RegistroDePonto {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        RegistroDePonto other = (RegistroDePonto) obj;
+        RegistroDePontoM other = (RegistroDePontoM) obj;
         if (id == null) {
             if (other.id != null)
                 return false;
