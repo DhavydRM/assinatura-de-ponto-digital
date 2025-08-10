@@ -23,22 +23,18 @@ public class Usuario implements Serializable{
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")
-    private List<RegistroDePontoM> registroDePontosM;
+    private List<RegistroDePonto> registroDePontos;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "usuario")
-    private List<RegistroDePontoT> registroDePontosT;
 
     public Usuario(){
     }
 
-    public Usuario(Long id, String nome, String email, String senha, List<RegistroDePontoT> tarde, List<RegistroDePontoM> manha) {
+    public Usuario(Long id, String nome, String email, String senha, List<RegistroDePonto> registro) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
-        this.registroDePontosM = manha;
-        this.registroDePontosT = tarde;
+        this.registroDePontos = registroDePontos;
     }
 
     public Long getId() {
@@ -73,12 +69,8 @@ public class Usuario implements Serializable{
         this.senha = senha;
     }
 
-    public List<RegistroDePontoM> getRegistroDePontosM() {
-        return registroDePontosM;
-    }
-
-    public List<RegistroDePontoT> getRegistroDePontosT() {
-        return registroDePontosT;
+    public List<RegistroDePonto> getRegistroDePontos() {
+        return registroDePontos;
     }
 
     @Override
