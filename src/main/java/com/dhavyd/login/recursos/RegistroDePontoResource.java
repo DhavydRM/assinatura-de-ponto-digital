@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -27,16 +27,8 @@ public class RegistroDePontoResource {
     private UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "date", defaultValue = "") String data) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<RegistroDePonto> registroDePontos = service.buscarTodos();
-
-        if (!data.isEmpty()) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate dataBuscada = LocalDate.parse(data, formatter);
-            List<RegistroDePonto> datas = registroDePontos.stream().filter(RegistroDePonto -> RegistroDePonto.equals(dataBuscada)).toList();
-
-            return ResponseEntity.ok().body(datas);
-        }
+    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "date") LocalDate data) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
+        List<RegistroDePonto> registroDePontos = service.buscarTodos(data);
 
         return ResponseEntity.ok().body(registroDePontos); // Retorna um JSON listando os RegistroDePontos no Body
     }

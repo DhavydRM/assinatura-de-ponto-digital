@@ -3,7 +3,7 @@ package com.dhavyd.login.entidades;
 import com.dhavyd.login.entidades.enums.Turnos;
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -16,20 +16,20 @@ public class RegistroDePonto {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
-    private Instant entrada;
-    private Instant saida;
+    private LocalDateTime entrada;
+    private LocalDateTime saida;
 
     @Enumerated(EnumType.STRING)
     private Turnos turno;
 
-    public RegistroDePonto(Instant entrada, Usuario usuario, Long id, Turnos turno) {
+    public RegistroDePonto(LocalDateTime entrada, Usuario usuario, Long id, Turnos turno) {
         this.entrada = entrada;
         this.usuario = usuario;
         this.id = id;
         this.turno = turno;
     }
 
-    public RegistroDePonto(Long id, Usuario usuario, Instant entrada, Instant saida, Turnos turno) {
+    public RegistroDePonto(Long id, Usuario usuario, LocalDateTime entrada, LocalDateTime saida, Turnos turno) {
         this.id = id;
         this.usuario = usuario;
         this.entrada = entrada;
@@ -57,19 +57,19 @@ public class RegistroDePonto {
         this.id = id;
     }
 
-    public Instant getSaida() {
+    public LocalDateTime getSaida() {
         return saida;
     }
 
-    public void setSaida(Instant saida) {
+    public void setSaida(LocalDateTime saida) {
         this.saida = saida;
     }
 
-    public Instant getEntrada() {
+    public LocalDateTime getEntrada() {
         return entrada;
     }
 
-    public void setEntrada(Instant entrada) {
+    public void setEntrada(LocalDateTime entrada) {
         this.entrada = entrada;
     }
 

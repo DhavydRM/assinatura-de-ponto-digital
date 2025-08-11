@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.*;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class RegistroDePontoService {
@@ -21,8 +22,23 @@ public class RegistroDePontoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<RegistroDePonto> buscarTodos() {
-        return repository.findAll();
+    public List<RegistroDePonto> buscarTodos(LocalDate data) {
+        List<RegistroDePonto> registroDePontos = repository.findAll();
+
+        if (Objects.nonNull(data)) {
+            List<RegistroDePonto> datas = registroDePontos.stream()
+                    .map(registroDePonto -> {
+                        final var entrada = registroDePonto.getEntrada().toLocalDate();
+                        if (entrada.equals(data)) {
+                            return registroDePonto;
+                        }
+                        return null;
+                    }).filter(Objects::nonNull)
+                    .toList();
+            return datas;
+        }
+
+        return registroDePontos;
     }
 
     public RegistroDePonto buscarPorId(Long id) throws Exception {
@@ -52,8 +68,8 @@ public class RegistroDePontoService {
 
 
     public RegistroDePonto marcarEntrada(RegistroDePonto registro) {
-        registro.setEntrada(Instant.now());
-        LocalDateTime dataSistema = registro.getEntrada().atZone(ZoneId.of("America/Sao_Paulo")).toLocalDateTime();
+        registro.setEntrada(LocalDateTime.now());
+        LocalDateTime dataSistema = registro.getEntrada();
         LocalDateTime meioDia = LocalDateTime.of(LocalDate.now(), LocalTime.NOON);
         LocalDateTime noite = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 00, 00));
 
@@ -72,7 +88,7 @@ public class RegistroDePontoService {
 
     public RegistroDePonto marcarSaida(List<RegistroDePonto> registros) {
         RegistroDePonto ultimoRegistro = registros.get(registros.size() - 1);
-        ultimoRegistro.setSaida(Instant.now());
+        ultimoRegistro.setSaida(LocalDateTime.now());
         return repository.save(ultimoRegistro);
     }
 
@@ -91,7 +107,7 @@ public class RegistroDePontoService {
         registro.setSaida(novosDados.getSaida());
     }
 
-    public boolean isPresent(Long usuarioId, Instant date) {
+    public boolean isPresent(Long usuarioId, LocalDateTime date) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
         for (RegistroDePonto x : usuario.getRegistroDePontos()) {
             if (date.equals(x.getEntrada())) {
