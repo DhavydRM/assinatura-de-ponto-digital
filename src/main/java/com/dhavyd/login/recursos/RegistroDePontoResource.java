@@ -15,6 +15,8 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/registros")
@@ -35,8 +37,7 @@ public class RegistroDePontoResource {
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<RegistroDePonto> buscarPorId(@PathVariable Long id) throws Exception {
-        RegistroDePonto registroDePonto = service.buscarPorId(id);
-        return ResponseEntity.ok().body(registroDePonto);
+        return ResponseEntity.ok().body(service.buscarPorId(id));
     }
 
     @GetMapping(value = "usuario/{usuarioId}")
@@ -45,30 +46,17 @@ public class RegistroDePontoResource {
         return ResponseEntity.ok().body(registroDePonto);
     }
 
-    @GetMapping("/hoje/{usuarioId}")
-    public ResponseEntity<RegistroDePonto> buscarPontoDeHoje(@PathVariable Long usuarioId) {
-        LocalDateTime hoje = LocalDateTime.now();
-        RegistroDePonto registroDoDia = service.buscarPorUsuarioIdAndData(usuarioId, hoje);
-
-        return ResponseEntity.ok().body(registroDoDia);
-    }
-
     @PostMapping(value = "/entrada/{usuarioId}")
     public ResponseEntity<RegistroDePonto> marcarEntrada(@PathVariable Long usuarioId) {
-        Usuario user = usuarioService.buscarPorId(usuarioId);
+        RegistroDePonto registroDePonto = service.marcarEntrada(usuarioId);
 
-        RegistroDePonto registroExistente = service.buscarPorUsuarioIdAndData(usuarioId, LocalDateTime.now());
-
-        if (registroExistente != null) {
-            if (service.isPresent(usuarioId, registroExistente.getEntrada()) && registroExistente.getEntrada() != null) {
-                return ResponseEntity.badRequest().body(null);
-            }
+        if (Objects.nonNull(registroDePonto)) {
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(registroDePonto.getId()).toUri();
+            return ResponseEntity.created(uri).body(registroDePonto);
+        } else {
+            return ResponseEntity.badRequest().body(null);
         }
-
-        RegistroDePonto registroDePonto = service.marcarEntrada(new RegistroDePonto(null, user, null, null));
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(registroDePonto.getId()).toUri();
-        return ResponseEntity.created(uri).body(registroDePonto);
     }
 
     @PostMapping(value = "/saida/{usuarioId}")

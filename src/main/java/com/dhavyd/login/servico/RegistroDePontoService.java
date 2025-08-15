@@ -15,7 +15,7 @@ import java.util.Objects;
 
 @Service
 public class RegistroDePontoService {
-    
+
     @Autowired
     private RegistroDePontoRepository repository;
 
@@ -24,9 +24,9 @@ public class RegistroDePontoService {
 
     public List<RegistroDePonto> buscarTodos(LocalDate data) {
         List<RegistroDePonto> registroDePontos = repository.findAll();
-
+        registroDePontos.getLast();
         if (Objects.nonNull(data)) {
-            List<RegistroDePonto> datas = registroDePontos.stream()
+            return registroDePontos.stream()
                     .map(registroDePonto -> {
                         final var entrada = registroDePonto.getEntrada().toLocalDate();
                         if (entrada.equals(data)) {
@@ -35,59 +35,66 @@ public class RegistroDePontoService {
                         return null;
                     }).filter(Objects::nonNull)
                     .toList();
-            return datas;
         }
 
         return registroDePontos;
     }
 
-    public RegistroDePonto buscarPorId(Long id) throws Exception {
-        RegistroDePonto registro = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
-        return registro;
+    public RegistroDePonto buscarPorId(Long id) {
+         return repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
     }
 
     public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario) {
-        Usuario usuario = usuarioRepository.findById(idUsuario).orElseThrow(() -> new RecursoNaoEncontrado("Usuário sem horas registradas!"));
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
         return usuario.getRegistroDePontos();
     }
 
-    public RegistroDePonto buscarPorUsuarioIdAndData(Long usuarioId, LocalDateTime hoje) {
-        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("id"));
-        RegistroDePonto registro = null;
-        ZoneId zoneId = ZoneId.of("America/Sao_Paulo");
-
-        for (RegistroDePonto x : usuario.getRegistroDePontos()) {
-            LocalDate ld = x.getEntrada().atZone(zoneId).toLocalDate();
-            if (ld.equals(hoje)) {
-                registro = new RegistroDePonto(x.getId(), x.getUsuario(), x.getEntrada(), x.getSaida(), x.getTurno());
-                return registro;
-            }   
-        }
-        return null;
-    }
-
-
-    public RegistroDePonto marcarEntrada(RegistroDePonto registro) {
-        registro.setEntrada(LocalDateTime.now());
+    public RegistroDePonto marcarEntrada(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
+        RegistroDePonto registro = new RegistroDePonto(LocalDateTime.now(), usuario, null, null);
         LocalDateTime dataSistema = registro.getEntrada();
         LocalDateTime meioDia = LocalDateTime.of(LocalDate.now(), LocalTime.NOON);
-        LocalDateTime noite = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 00, 00));
+        LocalDateTime noite = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0, 0));
 
-        if(dataSistema.isBefore(meioDia)) {
+        if (dataSistema.isBefore(meioDia)) {
             registro.setTurno(Turnos.MANHA);
 
-        } else if(dataSistema.isAfter(meioDia) && dataSistema.isBefore(noite)) {
+        } else if (dataSistema.isAfter(meioDia) && dataSistema.isBefore(noite)) {
             registro.setTurno(Turnos.TARDE);
 
         } else {
             registro.setTurno(Turnos.NOITE);
         }
 
+        RegistroDePonto registroExistente = usuario.getRegistroDePontos()
+                .stream()
+                .filter(registroDePonto ->
+                        registroDePonto.getEntrada()
+                                .toLocalDate()
+                                .equals(LocalDate.now()))
+                .toList().getLast();
+
+
+        if (Objects.nonNull(registroExistente)) {
+            if (registroExistente.getTurno().equals(Turnos.MANHA) || registroExistente.getTurno().equals(Turnos.TARDE)) {
+                if (!registroExistente.getTurno().equals(registro.getTurno())) {
+                    return repository.save(registro);
+                } else {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+        }
+
         return repository.save(registro);
     }
 
+
     public RegistroDePonto marcarSaida(List<RegistroDePonto> registros) {
-        RegistroDePonto ultimoRegistro = registros.get(registros.size() - 1);
+        RegistroDePonto ultimoRegistro = registros.getLast();
         ultimoRegistro.setSaida(LocalDateTime.now());
         return repository.save(ultimoRegistro);
     }
@@ -105,15 +112,5 @@ public class RegistroDePontoService {
     private void atualizarRegistroDePonto(RegistroDePonto registro, RegistroDePonto novosDados) {
         registro.setEntrada(novosDados.getEntrada());
         registro.setSaida(novosDados.getSaida());
-    }
-
-    public boolean isPresent(Long usuarioId, LocalDateTime date) {
-        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
-        for (RegistroDePonto x : usuario.getRegistroDePontos()) {
-            if (date.equals(x.getEntrada())) {
-                return true;
-            }
-        }
-        return false;
     }
 }
