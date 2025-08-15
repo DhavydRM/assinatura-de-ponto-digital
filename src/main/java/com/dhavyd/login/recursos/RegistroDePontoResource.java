@@ -62,11 +62,15 @@ public class RegistroDePontoResource {
 
     @PostMapping(value = "/saida/{usuarioId}")
     public ResponseEntity<RegistroDePonto> marcarSaida(@PathVariable Long usuarioId) {
-        Usuario user = usuarioService.buscarPorId(usuarioId);
-        RegistroDePonto registroDePonto = service.marcarSaida(user.getRegistroDePontos());
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
-                .buildAndExpand(registroDePonto.getId()).toUri();
-        return ResponseEntity.created(uri).body(registroDePonto);
+        RegistroDePonto registroDePonto = service.marcarSaida(usuarioId);
+
+        if (Objects.nonNull(registroDePonto)) {
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                    .buildAndExpand(registroDePonto.getId()).toUri();
+            return ResponseEntity.created(uri).body(registroDePonto);
+        } else {
+            return ResponseEntity.badRequest().body(null);
+        }
     }
 
     @DeleteMapping(value = "/{id}")

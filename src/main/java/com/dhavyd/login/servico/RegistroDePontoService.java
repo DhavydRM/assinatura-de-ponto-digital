@@ -101,10 +101,17 @@ public class RegistroDePontoService {
     }
 
 
-    public RegistroDePonto marcarSaida(List<RegistroDePonto> registros) {
-        RegistroDePonto ultimoRegistro = registros.getLast();
-        ultimoRegistro.setSaida(LocalDateTime.now());
-        return repository.save(ultimoRegistro);
+    public RegistroDePonto marcarSaida(Long usuarioId) {
+        Usuario user = usuarioRepository.findById(usuarioId).orElse(null);
+        assert user != null;
+        RegistroDePonto ultimoRegistro = user.getRegistroDePontos().getLast();
+
+        if (!Objects.nonNull(ultimoRegistro.getSaida())) { // Retorna verdadeiro se a saída do usuário estiver vazia
+            ultimoRegistro.setSaida(LocalDateTime.now());
+            return repository.save(ultimoRegistro);
+        }
+
+        return null;
     }
 
     public void deletarRegistro(Long id) {
