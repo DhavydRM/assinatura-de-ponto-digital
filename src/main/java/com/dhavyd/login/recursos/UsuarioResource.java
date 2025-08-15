@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 @RestController // Identifica que aqui é o controlador da API(Faz a comunicação direta com o front)
-@RequestMapping(value = "/usuarios") // Adiciona o endpoint pela qual os metodos serão chamados
+@RequestMapping(value = "usuarios") // Adiciona o endpoint pela qual os metodos serão chamados
 public class UsuarioResource {
     
     @Autowired

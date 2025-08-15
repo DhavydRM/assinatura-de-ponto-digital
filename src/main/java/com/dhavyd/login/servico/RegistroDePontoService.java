@@ -45,9 +45,17 @@ public class RegistroDePontoService {
                 .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
     }
 
-    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario) {
+    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario, boolean carregarRegistros) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
+
+        if (carregarRegistros) {
+            return usuario.getRegistroDePontos()
+                    .stream()
+                    .filter(registroDePonto -> registroDePonto.getEntrada().toLocalDate().equals(LocalDate.now()))
+                    .toList();
+
+        }
         return usuario.getRegistroDePontos();
     }
 
@@ -68,18 +76,18 @@ public class RegistroDePontoService {
             registro.setTurno(Turnos.NOITE);
         }
 
-        RegistroDePonto registroExistente = usuario.getRegistroDePontos()
+        List<RegistroDePonto> registroExistente = usuario.getRegistroDePontos()
                 .stream()
                 .filter(registroDePonto ->
                         registroDePonto.getEntrada()
                                 .toLocalDate()
                                 .equals(LocalDate.now()))
-                .toList().getLast();
+                .toList();
 
-
-        if (Objects.nonNull(registroExistente)) {
-            if (registroExistente.getTurno().equals(Turnos.MANHA) || registroExistente.getTurno().equals(Turnos.TARDE)) {
-                if (!registroExistente.getTurno().equals(registro.getTurno())) {
+        if (!registroExistente.isEmpty()) {
+            RegistroDePonto ultimoRegistro = registroExistente.getLast();
+            if (ultimoRegistro.getTurno().equals(Turnos.MANHA) || ultimoRegistro.getTurno().equals(Turnos.TARDE)) {
+                if (!ultimoRegistro.getTurno().equals(registro.getTurno())) {
                     return repository.save(registro);
                 } else {
                     return null;

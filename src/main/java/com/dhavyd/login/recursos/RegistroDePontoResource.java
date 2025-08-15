@@ -36,13 +36,14 @@ public class RegistroDePontoResource {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<RegistroDePonto> buscarPorId(@PathVariable Long id) throws Exception {
+        public ResponseEntity<RegistroDePonto> buscarPorId(@PathVariable Long id) throws Exception {
         return ResponseEntity.ok().body(service.buscarPorId(id));
     }
 
-    @GetMapping(value = "usuario/{usuarioId}")
-    public ResponseEntity<List<RegistroDePonto>> buscarPorIdUsario(@PathVariable Long id) throws Exception {
-        List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id);
+    @GetMapping(value = "/usuario/{usuarioId}")
+    public ResponseEntity<List<RegistroDePonto>> buscarPorIdUsario(@PathVariable("usuarioId") Long id,
+                                                                   @RequestParam(name = "carregarRegistros", defaultValue = "false") boolean carregarRegitros) {
+        List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id, carregarRegitros);
         return ResponseEntity.ok().body(registroDePonto);
     }
 
