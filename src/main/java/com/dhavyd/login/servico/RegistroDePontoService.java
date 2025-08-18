@@ -36,7 +36,6 @@ public class RegistroDePontoService {
                     }).filter(Objects::nonNull)
                     .toList();
         }
-
         return registroDePontos;
     }
 

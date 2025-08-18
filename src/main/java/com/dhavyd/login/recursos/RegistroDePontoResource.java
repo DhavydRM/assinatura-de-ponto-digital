@@ -29,8 +29,8 @@ public class RegistroDePontoResource {
     private UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "date", defaultValue = "") LocalDate data) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<RegistroDePonto> registroDePontos = service.buscarTodos(data);
+    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "date", defaultValue = "") LocalDate dataFiltro) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
+        List<RegistroDePonto> registroDePontos = service.buscarTodos(dataFiltro);
 
         return ResponseEntity.ok().body(registroDePontos); // Retorna um JSON listando os RegistroDePontos no Body
     }
