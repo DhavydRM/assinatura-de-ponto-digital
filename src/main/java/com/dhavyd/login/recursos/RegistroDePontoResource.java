@@ -2,9 +2,7 @@ package com.dhavyd.login.recursos;
 
 
 import com.dhavyd.login.entidades.RegistroDePonto;
-import com.dhavyd.login.entidades.Usuario;
 import com.dhavyd.login.servico.RegistroDePontoService;
-import com.dhavyd.login.servico.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +10,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/registros")
@@ -25,12 +20,11 @@ public class RegistroDePontoResource {
     @Autowired
     private RegistroDePontoService service;
 
-    @Autowired
-    private UsuarioService usuarioService;
-
     @GetMapping
-    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "date", defaultValue = "") LocalDate dataFiltro) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<RegistroDePonto> registroDePontos = service.buscarTodos(dataFiltro);
+    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "data", defaultValue = "") LocalDate dataFiltro,
+                                                             @RequestParam(name = "dataInicial", defaultValue = "") LocalDate dataInicial,
+                                                             @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
+        List<RegistroDePonto> registroDePontos = service.buscarTodos(dataFiltro, dataInicial, dataFinal);
 
         return ResponseEntity.ok().body(registroDePontos); // Retorna um JSON listando os RegistroDePontos no Body
     }

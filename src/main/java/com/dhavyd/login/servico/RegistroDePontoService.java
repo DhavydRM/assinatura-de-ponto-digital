@@ -22,14 +22,26 @@ public class RegistroDePontoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<RegistroDePonto> buscarTodos(LocalDate data) {
+    public List<RegistroDePonto> buscarTodos(LocalDate dataFiltrada, LocalDate dataInicial, LocalDate dataFinal) {
         List<RegistroDePonto> registroDePontos = repository.findAll();
-        registroDePontos.getLast();
-        if (Objects.nonNull(data)) {
+        if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
+            var diaInicial = dataInicial.getDayOfMonth();
+            var diaFinal = dataFinal.getDayOfMonth();
             return registroDePontos.stream()
                     .map(registroDePonto -> {
                         final var entrada = registroDePonto.getEntrada().toLocalDate();
-                        if (entrada.equals(data)) {
+                        if (entrada.getDayOfMonth() >= diaInicial && entrada.getDayOfMonth() <= diaFinal) {
+                            return registroDePonto;
+                        }
+                        return null;
+                    }).filter(Objects::nonNull)
+                    .toList();
+        }
+        if (Objects.nonNull(dataFiltrada)) {
+            return registroDePontos.stream()
+                    .map(registroDePonto -> {
+                        final var entrada = registroDePonto.getEntrada().toLocalDate();
+                        if (entrada.equals(dataFiltrada)) {
                             return registroDePonto;
                         }
                         return null;
