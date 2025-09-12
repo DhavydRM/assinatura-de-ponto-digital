@@ -73,19 +73,8 @@ public class RegistroDePontoService {
     public RegistroDePonto marcarEntrada(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
         RegistroDePonto registro = new RegistroDePonto(LocalDateTime.now(), usuario, null, null);
-        LocalDateTime dataSistema = registro.getEntrada();
-        LocalDateTime meioDia = LocalDateTime.of(LocalDate.now(), LocalTime.NOON);
-        LocalDateTime noite = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0, 0));
 
-        if (dataSistema.isBefore(meioDia)) {
-            registro.setTurno(Turnos.MANHA);
-
-        } else if (dataSistema.isAfter(meioDia) && dataSistema.isBefore(noite)) {
-            registro.setTurno(Turnos.TARDE);
-
-        } else {
-            registro.setTurno(Turnos.NOITE);
-        }
+        registro.setTurno(retornarTurno(registro.getEntrada()));
 
         List<RegistroDePonto> registroExistente = usuario.getRegistroDePontos()
                 .stream()
@@ -109,6 +98,22 @@ public class RegistroDePontoService {
         }
 
         return repository.save(registro);
+    }
+
+    private Turnos retornarTurno(LocalDateTime entrada) {
+
+        LocalDateTime meioDia = LocalDateTime.of(LocalDate.now(), LocalTime.NOON);
+        LocalDateTime noite = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0, 0));
+
+        if (entrada.isBefore(meioDia)) {
+            return Turnos.MANHA;
+
+        } else if (entrada.isAfter(meioDia) && entrada.isBefore(noite)) {
+            return Turnos.TARDE;
+
+        } else {
+            return Turnos.NOITE;
+        }
     }
 
 
@@ -138,5 +143,6 @@ public class RegistroDePontoService {
     private void atualizarRegistroDePonto(RegistroDePonto registro, RegistroDePonto novosDados) {
         registro.setEntrada(novosDados.getEntrada());
         registro.setSaida(novosDados.getSaida());
+        registro.setTurno(retornarTurno(registro.getEntrada()));
     }
 }
