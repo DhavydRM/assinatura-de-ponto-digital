@@ -3,13 +3,10 @@ package com.dhavyd.login.entidades;
 import java.io.Serializable;
 import java.util.List;
 
+import com.dhavyd.login.entidades.enums.Roles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 @Entity
 public class Usuario implements Serializable{
@@ -20,6 +17,8 @@ public class Usuario implements Serializable{
     private String nome;
     private String email;
     private String senha;
+    @Enumerated(EnumType.STRING)
+    private Roles funcao;
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")
@@ -29,11 +28,12 @@ public class Usuario implements Serializable{
     public Usuario(){
     }
 
-    public Usuario(Long id, String nome, String email, String senha, List<RegistroDePonto> registro) {
+    public Usuario(Long id, String nome, String email, String senha, List<RegistroDePonto> registro, Roles funcao) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
+        this.funcao = funcao;
         this.registroDePontos = registroDePontos;
     }
 
@@ -71,6 +71,14 @@ public class Usuario implements Serializable{
 
     public List<RegistroDePonto> getRegistroDePontos() {
         return registroDePontos;
+    }
+
+    public Roles getFuncao() {
+        return funcao;
+    }
+
+    public void setFuncao(Roles funcao) {
+        this.funcao = funcao;
     }
 
     @Override

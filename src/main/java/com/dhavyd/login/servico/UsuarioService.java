@@ -42,6 +42,7 @@ public class UsuarioService {
         user.setNome(usuario.getNome());
         user.setEmail(usuario.getEmail());
         user.setSenha(usuario.getSenha());
+        user.setFuncao(usuario.getFuncao());
     }
 
     
