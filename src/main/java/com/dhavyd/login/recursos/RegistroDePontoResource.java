@@ -21,10 +21,9 @@ public class RegistroDePontoResource {
     private RegistroDePontoService service;
 
     @GetMapping
-    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "data", defaultValue = "") LocalDate dataFiltro,
-                                                             @RequestParam(name = "dataInicial", defaultValue = "") LocalDate dataInicial,
+    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "dataInicial", defaultValue = "") LocalDate dataInicial,
                                                              @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<RegistroDePonto> registroDePontos = service.buscarTodos(dataFiltro, dataInicial, dataFinal);
+        List<RegistroDePonto> registroDePontos = service.buscarTodos(dataInicial, dataFinal);
 
         return ResponseEntity.ok().body(registroDePontos); // Retorna um JSON listando os RegistroDePontos no Body
     }
@@ -36,8 +35,10 @@ public class RegistroDePontoResource {
 
     @GetMapping(value = "/usuario/{usuarioId}")
     public ResponseEntity<List<RegistroDePonto>> buscarPorIdUsario(@PathVariable("usuarioId") Long id,
-                                                                   @RequestParam(name = "carregarRegistros", defaultValue = "false") boolean carregarRegitros) {
-        List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id, carregarRegitros);
+                                                                   @RequestParam(name = "carregarRegistrosToday", defaultValue = "false") boolean carregarRegitrosToday,
+                                                                   @RequestParam(name = "dataInicial", defaultValue = "" ) LocalDate dataInicial,
+                                                                   @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) {
+        List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id, carregarRegitrosToday, dataInicial, dataFinal);
         return ResponseEntity.ok().body(registroDePonto);
     }
 

@@ -22,26 +22,18 @@ public class RegistroDePontoService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<RegistroDePonto> buscarTodos(LocalDate dataFiltrada, LocalDate dataInicial, LocalDate dataFinal) {
+    public List<RegistroDePonto> buscarTodos(LocalDate dataInicial, LocalDate dataFinal) {
         List<RegistroDePonto> registroDePontos = repository.findAll();
+
         if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
-            var diaInicial = dataInicial.getDayOfMonth();
-            var diaFinal = dataFinal.getDayOfMonth();
-            return registroDePontos.stream()
-                    .map(registroDePonto -> {
-                        final var entrada = registroDePonto.getEntrada().toLocalDate();
-                        if (entrada.getDayOfMonth() >= diaInicial && entrada.getDayOfMonth() <= diaFinal) {
-                            return registroDePonto;
-                        }
-                        return null;
-                    }).filter(Objects::nonNull)
-                    .toList();
+            return registrosPorPeriodo(registroDePontos, dataInicial, dataFinal);
         }
-        if (Objects.nonNull(dataFiltrada)) {
+
+        if (Objects.nonNull(dataInicial)) {
             return registroDePontos.stream()
                     .map(registroDePonto -> {
                         final var entrada = registroDePonto.getEntrada().toLocalDate();
-                        if (entrada.equals(dataFiltrada)) {
+                        if (entrada.equals(dataInicial)) {
                             return registroDePonto;
                         }
                         return null;
@@ -56,16 +48,21 @@ public class RegistroDePontoService {
                 .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
     }
 
-    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario, boolean carregarRegistros) {
+    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario, boolean carregarRegistrosToday, LocalDate dataInicial,
+                                                    LocalDate dataFinal) {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
 
-        if (carregarRegistros) {
+        if (carregarRegistrosToday) {
             return usuario.getRegistroDePontos()
                     .stream()
                     .filter(registroDePonto -> registroDePonto.getEntrada().toLocalDate().equals(LocalDate.now()))
                     .toList();
 
+        }
+
+        if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
+            return registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataFinal);
         }
         return usuario.getRegistroDePontos();
     }
@@ -144,5 +141,20 @@ public class RegistroDePontoService {
         registro.setEntrada(novosDados.getEntrada());
         registro.setSaida(novosDados.getSaida());
         registro.setTurno(retornarTurno(registro.getEntrada()));
+    }
+
+    private List<RegistroDePonto> registrosPorPeriodo(List<RegistroDePonto> registroDePontos, LocalDate dataInicial, LocalDate dataFinal) {
+
+        return registroDePontos.stream()
+                .map(registroDePonto -> {
+                    final var entrada = registroDePonto.getEntrada().toLocalDate();
+                    if (entrada.isEqual(dataInicial) || entrada.isAfter(dataInicial) &&
+                            entrada.isEqual(dataFinal) || entrada.isBefore(dataFinal)) {
+
+                        return registroDePonto;
+                    }
+                    return null;
+                }).filter(Objects::nonNull)
+                .toList();
     }
 }
