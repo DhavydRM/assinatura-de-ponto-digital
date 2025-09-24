@@ -5,6 +5,7 @@ import java.util.Objects;
 
 
 import com.dhavyd.login.dto.LoginDTO;
+import com.dhavyd.login.dto.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,16 +15,22 @@ import com.dhavyd.login.servico.execoes.RecursoNaoEncontrado;
 
 @Service
 public class UsuarioService {
-    
+
     @Autowired
     private UsuarioRepository repository;
 
-    public List<Usuario> buscarTodos() {
-        return repository.findAll();
+    public List<UsuarioDTO> buscarTodos() {
+        List<Usuario> usuarioList = repository.findAll();
+
+        return usuarioList
+                .stream()
+                .map(
+                        UsuarioDTO::usuarioToDTO)
+                .toList(); // Retorna uma lista com usuários DTO
     }
 
-    public Usuario buscarPorId(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RecursoNaoEncontrado("id"));
+    public UsuarioDTO buscarPorId(Long id) {
+        return UsuarioDTO.usuarioToDTO(repository.findById(id).orElseThrow(() -> new RecursoNaoEncontrado("id")));
     }
 
     public Usuario inserir(Usuario usuario) {

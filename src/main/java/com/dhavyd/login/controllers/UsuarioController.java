@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import com.dhavyd.login.dto.LoginDTO;
+import com.dhavyd.login.dto.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,14 +22,14 @@ public class UsuarioController {
     private UsuarioService service;
 
     @GetMapping
-    public ResponseEntity<List<Usuario>> buscarTodos() { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<Usuario> usuarios = service.buscarTodos();
+    public ResponseEntity<List<UsuarioDTO>> buscarTodos() { // ResponseEntity é a classe responsavel por todas as requisições HTTP
+        List<UsuarioDTO> usuarios = service.buscarTodos();
         return ResponseEntity.ok().body(usuarios); // Retorna um JSON listando os usuarios no Body
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
-        Usuario usuario = service.buscarPorId(id);
+    public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
+        UsuarioDTO usuario = service.buscarPorId(id);
         return ResponseEntity.ok().body(usuario);
     }
 
