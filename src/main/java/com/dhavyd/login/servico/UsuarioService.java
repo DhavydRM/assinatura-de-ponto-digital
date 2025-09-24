@@ -1,8 +1,10 @@
 package com.dhavyd.login.servico;
 
 import java.util.List;
+import java.util.Objects;
 
 
+import com.dhavyd.login.dto.LoginDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,20 @@ public class UsuarioService {
         Usuario user = repository.getReferenceById(id);
         atualizarUsuario(user, usuario);
         return repository.save(user);
+    }
+
+    public Boolean autenticarUsuario(LoginDTO login) {
+        Usuario usuario = repository.findByEmail(login.email());
+        if (Objects.nonNull(usuario)) {
+            if (usuario.getSenha().equals(login.senha())) {
+                return true; // Email e senha batem, então libera o acesso do usuário
+
+            } else { // Senha incorreta, não autentica o usuário
+                return false;
+            }
+        } else { // Não encontrou nenhum usuario com o email informado, não autentica
+            return false;
+        }
     }
 
     private void atualizarUsuario(Usuario user, Usuario usuario) {

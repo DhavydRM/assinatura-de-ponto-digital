@@ -48,8 +48,11 @@ public class RegistroDePontoService {
                 .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
     }
 
-    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario, boolean carregarRegistrosToday, LocalDate dataInicial,
+    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario,
+                                                    boolean carregarRegistrosToday,
+                                                    LocalDate dataInicial,
                                                     LocalDate dataFinal) {
+
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
 
@@ -63,6 +66,8 @@ public class RegistroDePontoService {
 
         if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
             return registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataFinal);
+        } else if (Objects.nonNull(dataInicial)){
+            return registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataInicial);
         }
         return usuario.getRegistroDePontos();
     }
@@ -113,7 +118,6 @@ public class RegistroDePontoService {
         }
     }
 
-
     public RegistroDePonto marcarSaida(Long usuarioId) {
         Usuario user = usuarioRepository.findById(usuarioId).orElse(null);
         assert user != null;
@@ -148,8 +152,9 @@ public class RegistroDePontoService {
         return registroDePontos.stream()
                 .map(registroDePonto -> {
                     final var entrada = registroDePonto.getEntrada().toLocalDate();
-                    if (entrada.isEqual(dataInicial) || entrada.isAfter(dataInicial) &&
-                            entrada.isEqual(dataFinal) || entrada.isBefore(dataFinal)) {
+                    if (entrada.isAfter(dataInicial) && entrada.isBefore(dataFinal) ||
+                            entrada.isEqual(dataInicial) ||
+                            entrada.isEqual(dataFinal)) {
 
                         return registroDePonto;
                     }
