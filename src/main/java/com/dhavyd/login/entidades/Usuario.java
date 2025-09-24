@@ -22,13 +22,13 @@ public class Usuario implements Serializable{
 
     @JsonIgnore
     @OneToMany(mappedBy = "usuario")
-    private List<RegistroDePonto> registroDePontos;
+    private List<Registro> registroDePontos;
 
 
     public Usuario(){
     }
 
-    public Usuario(Long id, String nome, String email, String senha, List<RegistroDePonto> registro, Roles funcao) {
+    public Usuario(Long id, String nome, String email, String senha, List<Registro> registro, Roles funcao) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -69,7 +69,7 @@ public class Usuario implements Serializable{
         this.senha = senha;
     }
 
-    public List<RegistroDePonto> getRegistroDePontos() {
+    public List<Registro> getRegistroDePontos() {
         return registroDePontos;
     }
 

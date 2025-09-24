@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-public class RegistroDePonto {
+@Table(name = "registro_de_ponto")
+public class Registro {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,14 +23,14 @@ public class RegistroDePonto {
     @Enumerated(EnumType.STRING)
     private Turnos turno;
 
-    public RegistroDePonto(LocalDateTime entrada, Usuario usuario, Long id, Turnos turno) {
+    public Registro(LocalDateTime entrada, Usuario usuario, Long id, Turnos turno) {
         this.entrada = entrada;
         this.usuario = usuario;
         this.id = id;
         this.turno = turno;
     }
 
-    public RegistroDePonto(Long id, Usuario usuario, LocalDateTime entrada, LocalDateTime saida, Turnos turno) {
+    public Registro(Long id, Usuario usuario, LocalDateTime entrada, LocalDateTime saida, Turnos turno) {
         this.id = id;
         this.usuario = usuario;
         this.entrada = entrada;
@@ -37,7 +38,7 @@ public class RegistroDePonto {
         this.turno = turno;
     }
 
-    public RegistroDePonto() {
+    public Registro() {
 
     }
 
@@ -84,7 +85,7 @@ public class RegistroDePonto {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        RegistroDePonto that = (RegistroDePonto) o;
+        Registro that = (Registro) o;
         return Objects.equals(entrada, that.entrada);
     }
 

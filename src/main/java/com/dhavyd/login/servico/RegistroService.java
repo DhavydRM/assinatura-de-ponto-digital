@@ -1,9 +1,11 @@
 package com.dhavyd.login.servico;
 
-import com.dhavyd.login.entidades.RegistroDePonto;
+import com.dhavyd.login.dto.RegistroDTO;
+import com.dhavyd.login.dto.RegistroDeUsuarioDTO;
+import com.dhavyd.login.entidades.Registro;
 import com.dhavyd.login.entidades.Usuario;
 import com.dhavyd.login.entidades.enums.Turnos;
-import com.dhavyd.login.repositorios.RegistroDePontoRepository;
+import com.dhavyd.login.repositorios.RegistroRepository;
 import com.dhavyd.login.repositorios.UsuarioRepository;
 import com.dhavyd.login.servico.execoes.RecursoNaoEncontrado;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,71 +16,65 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class RegistroDePontoService {
+public class RegistroService {
 
     @Autowired
-    private RegistroDePontoRepository repository;
+    private RegistroRepository repository;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<RegistroDePonto> buscarTodos(LocalDate dataInicial, LocalDate dataFinal) {
-        List<RegistroDePonto> registroDePontos = repository.findAll();
+    public List<RegistroDTO> buscarTodos(LocalDate dataInicial, LocalDate dataFinal) {
+        List<Registro> registroDePontos = repository.findAll();
 
         if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
-            return registrosPorPeriodo(registroDePontos, dataInicial, dataFinal);
+            return RegistroDTO.listaResgistroToDTO(registrosPorPeriodo(registroDePontos, dataInicial, dataFinal));
         }
 
         if (Objects.nonNull(dataInicial)) {
-            return registroDePontos.stream()
-                    .map(registroDePonto -> {
-                        final var entrada = registroDePonto.getEntrada().toLocalDate();
-                        if (entrada.equals(dataInicial)) {
-                            return registroDePonto;
-                        }
-                        return null;
-                    }).filter(Objects::nonNull)
-                    .toList();
+            return RegistroDTO.listaResgistroToDTO(registrosPorPeriodo(registroDePontos, dataInicial, dataInicial));
         }
-        return registroDePontos;
+
+        return RegistroDTO.listaResgistroToDTO(registroDePontos);
     }
 
-    public RegistroDePonto buscarPorId(Long id) {
-         return repository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!"));
+    public RegistroDTO buscarPorId(Long id) {
+         return RegistroDTO.registroToDTO(repository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!")));
     }
 
-    public List<RegistroDePonto> buscarPorIdUsuario(Long idUsuario,
-                                                    boolean carregarRegistrosToday,
-                                                    LocalDate dataInicial,
-                                                    LocalDate dataFinal) {
+    public List<RegistroDeUsuarioDTO> buscarPorIdUsuario(Long idUsuario,
+                                                         boolean carregarRegistrosToday,
+                                                         LocalDate dataInicial,
+                                                         LocalDate dataFinal) {
 
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
 
         if (carregarRegistrosToday) {
-            return usuario.getRegistroDePontos()
+            return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(usuario.getRegistroDePontos()
                     .stream()
                     .filter(registroDePonto -> registroDePonto.getEntrada().toLocalDate().equals(LocalDate.now()))
-                    .toList();
+                    .toList());
 
         }
 
         if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
-            return registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataFinal);
+            return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataFinal));
         } else if (Objects.nonNull(dataInicial)){
-            return registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataInicial);
+            return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataInicial));
         }
-        return usuario.getRegistroDePontos();
+
+        return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(usuario.getRegistroDePontos());
     }
 
-    public RegistroDePonto marcarEntrada(Long usuarioId) {
+    public Registro marcarEntrada(Long usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
-        RegistroDePonto registro = new RegistroDePonto(LocalDateTime.now(), usuario, null, null);
+        Registro registro = new Registro(LocalDateTime.now(), usuario, null, null);
 
         registro.setTurno(retornarTurno(registro.getEntrada()));
 
-        List<RegistroDePonto> registroExistente = usuario.getRegistroDePontos()
+        List<Registro> registroExistente = usuario.getRegistroDePontos()
                 .stream()
                 .filter(registroDePonto ->
                         registroDePonto.getEntrada()
@@ -87,7 +83,7 @@ public class RegistroDePontoService {
                 .toList();
 
         if (!registroExistente.isEmpty()) {
-            RegistroDePonto ultimoRegistro = registroExistente.getLast();
+            Registro ultimoRegistro = registroExistente.getLast();
             if (ultimoRegistro.getTurno().equals(Turnos.MANHA) || ultimoRegistro.getTurno().equals(Turnos.TARDE)) {
                 if (!ultimoRegistro.getTurno().equals(registro.getTurno())) {
                     return repository.save(registro);
@@ -118,10 +114,10 @@ public class RegistroDePontoService {
         }
     }
 
-    public RegistroDePonto marcarSaida(Long usuarioId) {
+    public Registro marcarSaida(Long usuarioId) {
         Usuario user = usuarioRepository.findById(usuarioId).orElse(null);
         assert user != null;
-        RegistroDePonto ultimoRegistro = user.getRegistroDePontos().getLast();
+        Registro ultimoRegistro = user.getRegistroDePontos().getLast();
 
         if (!Objects.nonNull(ultimoRegistro.getSaida())) { // Retorna verdadeiro se a saída do usuário estiver vazia
             ultimoRegistro.setSaida(LocalDateTime.now());
@@ -135,19 +131,19 @@ public class RegistroDePontoService {
         repository.deleteById(id);
     }
 
-    public RegistroDePonto atualizarResgistro(Long id, RegistroDePonto novosDados) {
-        RegistroDePonto registro = repository.getReferenceById(id);
+    public Registro atualizarResgistro(Long id, Registro novosDados) {
+        Registro registro = repository.getReferenceById(id);
         atualizarRegistroDePonto(registro, novosDados);
         return repository.save(registro);
     }
 
-    private void atualizarRegistroDePonto(RegistroDePonto registro, RegistroDePonto novosDados) {
+    private void atualizarRegistroDePonto(Registro registro, Registro novosDados) {
         registro.setEntrada(novosDados.getEntrada());
         registro.setSaida(novosDados.getSaida());
         registro.setTurno(retornarTurno(registro.getEntrada()));
     }
 
-    private List<RegistroDePonto> registrosPorPeriodo(List<RegistroDePonto> registroDePontos, LocalDate dataInicial, LocalDate dataFinal) {
+    private List<Registro> registrosPorPeriodo(List<Registro> registroDePontos, LocalDate dataInicial, LocalDate dataFinal) {
 
         return registroDePontos.stream()
                 .map(registroDePonto -> {

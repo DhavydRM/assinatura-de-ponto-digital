@@ -1,10 +1,11 @@
 package com.dhavyd.login.controllers;
 
 
-import com.dhavyd.login.entidades.RegistroDePonto;
-import com.dhavyd.login.servico.RegistroDePontoService;
+import com.dhavyd.login.dto.RegistroDTO;
+import com.dhavyd.login.dto.RegistroDeUsuarioDTO;
+import com.dhavyd.login.entidades.Registro;
+import com.dhavyd.login.servico.RegistroService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -16,36 +17,36 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping(value = "/registros")
-public class RegistroDePontoController {
+public class RegistroController {
 
     @Autowired
-    private RegistroDePontoService service;
+    private RegistroService service;
 
     @GetMapping// GET: Retorna todos os registros de ponto
-    public ResponseEntity<List<RegistroDePonto>> buscarTodos(@RequestParam(name = "dataInicial", defaultValue = "") LocalDate dataInicial,
-                                                             @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
-        List<RegistroDePonto> registroDePontos = service.buscarTodos(dataInicial, dataFinal);
+    public ResponseEntity<List<RegistroDTO>> buscarTodos(@RequestParam(name = "dataInicial", defaultValue = "") LocalDate dataInicial,
+                                                      @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) { // ResponseEntity é a classe responsavel por todas as requisições HTTP
+        List<RegistroDTO> registros = service.buscarTodos(dataInicial, dataFinal);
 
-        return ResponseEntity.ok().body(registroDePontos); // Retorna um JSON listando os RegistroDePontos no Body
+        return ResponseEntity.ok().body(registros); // Retorna um JSON listando os RegistroDePontos no Body
     }
 
     @GetMapping(value = "/{id}") // GET: Retorna um registro pelo id informado
-        public ResponseEntity<RegistroDePonto> buscarPorId(@PathVariable Long id) throws Exception {
+        public ResponseEntity<RegistroDTO> buscarPorId(@PathVariable Long id) throws Exception {
         return ResponseEntity.ok().body(service.buscarPorId(id));
     }
 
     @GetMapping(value = "/usuario/{usuarioId}") // GET: Busca os registros de um único usuário
-    public ResponseEntity<List<RegistroDePonto>> buscarPorIdUsario(@PathVariable("usuarioId") Long id,
-                                                                   @RequestParam(name = "carregarRegistrosToday", defaultValue = "false") boolean carregarRegitrosToday,
-                                                                   @RequestParam(name = "dataInicial", defaultValue = "" ) LocalDate dataInicial,
-                                                                   @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) {
-        List<RegistroDePonto> registroDePonto = service.buscarPorIdUsuario(id, carregarRegitrosToday, dataInicial, dataFinal);
-        return ResponseEntity.ok().body(registroDePonto);
+    public ResponseEntity<List<RegistroDeUsuarioDTO>> buscarPorIdUsario(@PathVariable("usuarioId") Long id,
+                                                                        @RequestParam(name = "carregarRegistrosToday", defaultValue = "false") boolean carregarRegitrosToday,
+                                                                        @RequestParam(name = "dataInicial", defaultValue = "" ) LocalDate dataInicial,
+                                                                        @RequestParam(name = "dataFinal", defaultValue = "") LocalDate dataFinal) {
+        List<RegistroDeUsuarioDTO> registros = service.buscarPorIdUsuario(id, carregarRegitrosToday, dataInicial, dataFinal);
+        return ResponseEntity.ok().body(registros);
     }
 
     @PostMapping(value = "/entrada/{usuarioId}") // POST: Marca a entrada de um usuário
-    public ResponseEntity<RegistroDePonto> marcarEntrada(@PathVariable Long usuarioId) {
-        RegistroDePonto registroDePonto = service.marcarEntrada(usuarioId);
+    public ResponseEntity<Registro> marcarEntrada(@PathVariable Long usuarioId) {
+        Registro registroDePonto = service.marcarEntrada(usuarioId);
 
         if (Objects.nonNull(registroDePonto)) {
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -57,8 +58,8 @@ public class RegistroDePontoController {
     }
 
     @PostMapping(value = "/saida/{usuarioId}") // POST: Marca a saída de um usuário
-    public ResponseEntity<RegistroDePonto> marcarSaida(@PathVariable Long usuarioId) {
-        RegistroDePonto registroDePonto = service.marcarSaida(usuarioId);
+    public ResponseEntity<Registro> marcarSaida(@PathVariable Long usuarioId) {
+        Registro registroDePonto = service.marcarSaida(usuarioId);
 
         if (Objects.nonNull(registroDePonto)) { // Retorna 200 se o registro tiver sido marcado
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -76,8 +77,8 @@ public class RegistroDePontoController {
     }
 
     @PutMapping(value = "/{id}") // Atualiza um registro por id
-    public ResponseEntity<RegistroDePonto> atualizar(@PathVariable Long id,
-                                                     @RequestBody RegistroDePonto RegistroDePonto) {
+    public ResponseEntity<Registro> atualizar(@PathVariable Long id,
+                                              @RequestBody Registro RegistroDePonto) {
         RegistroDePonto = service.atualizarResgistro(id, RegistroDePonto);
         return ResponseEntity.ok().body(RegistroDePonto);
     }
