@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 
+import com.dhavyd.login.auth.Token;
 import com.dhavyd.login.dto.LoginDTO;
 import com.dhavyd.login.dto.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +48,8 @@ public class UsuarioService {
         return repository.save(user);
     }
 
-    public Boolean autenticarUsuario(LoginDTO login) {
-        Usuario usuario = repository.findByEmail(login.email());
-        if (Objects.nonNull(usuario)) {
-            if (usuario.getSenha().equals(login.senha())) {
-                return true; // Email e senha batem, então libera o acesso do usuário
-
-            } else { // Senha incorreta, não autentica o usuário
-                return false;
-            }
-        } else { // Não encontrou nenhum usuario com o email informado, não autentica
-            return false;
-        }
+    public Token autenticarUsuario(LoginDTO login) {
+        return Token.gerarToken(login);
     }
 
     private void atualizarUsuario(Usuario user, Usuario usuario) {
@@ -67,6 +58,4 @@ public class UsuarioService {
         user.setSenha(usuario.getSenha());
         user.setFuncao(usuario.getFuncao());
     }
-
-    
 }

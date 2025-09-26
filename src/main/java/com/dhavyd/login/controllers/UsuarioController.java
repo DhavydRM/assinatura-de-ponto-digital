@@ -2,7 +2,9 @@ package com.dhavyd.login.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
+import com.dhavyd.login.auth.Token;
 import com.dhavyd.login.dto.LoginDTO;
 import com.dhavyd.login.dto.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,10 +56,10 @@ public class UsuarioController {
     }
 
     @PostMapping(value = "/auth")
-    public ResponseEntity<Void> autenticarUsuario(@RequestBody LoginDTO login) {
-        Boolean usuarioAutenticado = service.autenticarUsuario(login);
-        if (usuarioAutenticado) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<Token> autenticarUsuario(@RequestBody LoginDTO login) {
+        Token token = service.autenticarUsuario(login);
+        if (token.getToken()) {
+            return ResponseEntity.ok().body(token);
         } else {
             return ResponseEntity.badRequest().build();
         }
