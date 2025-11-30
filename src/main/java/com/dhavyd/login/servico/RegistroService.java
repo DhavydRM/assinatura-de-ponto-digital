@@ -43,84 +43,54 @@ public class RegistroService {
                 .orElseThrow(() -> new RecursoNaoEncontrado("Recurso não encontrado!")));
     }
 
-    public List<RegistroDeUsuarioDTO> buscarPorIdUsuario(Long idUsuario,
-                                                         boolean carregarRegistrosToday,
-                                                         LocalDate dataInicial,
-                                                         LocalDate dataFinal) {
-
-        Usuario usuario = usuarioRepository.findById(idUsuario)
+    public List<RegistroDeUsuarioDTO> buscarPorIdUsuario(Long idUsuario, boolean carregarRegistrosToday, LocalDate dataInicial, LocalDate dataFinal) {
+        Usuario usuario = usuarioRepository.findById(idUsuario) // Busca o usuário no banco de dados através do ID
                 .orElseThrow(() -> new RecursoNaoEncontrado("Usuário não encontrado!"));
 
-        if (carregarRegistrosToday) {
-            return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(usuario.getRegistroDePontos()
+        if (carregarRegistrosToday) { // Se verdadeiro, retorna todas os Registros onde a entrada seja do dia requisitado
+         return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(usuario.getRegistroDePontos()
                     .stream()
                     .filter(registroDePonto -> registroDePonto.getEntrada().toLocalDate().equals(LocalDate.now()))
                     .toList());
 
         }
 
-        if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) {
+        if (Objects.nonNull(dataInicial) && Objects.nonNull(dataFinal)) { // Retorna todos os regitros que estejam dentro do intervalo de DATAINICIAL e DATAFINAL
             return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataFinal));
-        } else if (Objects.nonNull(dataInicial)){
+        } else if (Objects.nonNull(dataInicial)){ // Retorna os registros apenas com entrada de DATAINICIAL
             return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(registrosPorPeriodo(usuario.getRegistroDePontos(), dataInicial, dataInicial));
         }
 
-        return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(usuario.getRegistroDePontos());
+        return RegistroDeUsuarioDTO.listaRegistroUsuarioToDTO(usuario.getRegistroDePontos()); // Em ultimo caso, retorna todos os registros que o usuário tem!
     }
 
     public Registro marcarEntrada(Long usuarioId) {
+        LocalDateTime registroExato = LocalDateTime.now(); // Pega o registro no exato momento que a função é chamada
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
-        Registro registro = new Registro(LocalDateTime.now(), usuario, null, null);
+        Registro registro = new Registro(registroExato, usuario, null);
 
-        registro.setTurno(retornarTurno(registro.getEntrada()));
-
-        List<Registro> registroExistente = usuario.getRegistroDePontos()
+        List<Registro> registrosExistentes = usuario.getRegistroDePontos() // Verifica se já tem registros naquele dia
                 .stream()
-                .filter(registroDePonto ->
-                        registroDePonto.getEntrada()
-                                .toLocalDate()
-                                .equals(LocalDate.now()))
+                .filter(registroDePonto -> registroDePonto.getEntrada()
+                        .toLocalDate()
+                        .equals(LocalDate.now()))
                 .toList();
 
-        if (!registroExistente.isEmpty()) {
-            Registro ultimoRegistro = registroExistente.getLast();
-            if (ultimoRegistro.getTurno().equals(Turnos.MANHA) || ultimoRegistro.getTurno().equals(Turnos.TARDE)) {
-                if (!ultimoRegistro.getTurno().equals(registro.getTurno())) {
-                    return repository.save(registro);
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
-        }
-
-        return repository.save(registro);
-    }
-
-    private Turnos retornarTurno(LocalDateTime entrada) {
-
-        LocalDateTime meioDia = LocalDateTime.of(LocalDate.now(), LocalTime.NOON);
-        LocalDateTime noite = LocalDateTime.of(LocalDate.now(), LocalTime.of(18, 0, 0));
-
-        if (entrada.isBefore(meioDia)) {
-            return Turnos.MANHA;
-
-        } else if (entrada.isAfter(meioDia) && entrada.isBefore(noite)) {
-            return Turnos.TARDE;
-
-        } else {
-            return Turnos.NOITE;
+        if (registrosExistentes.size() >= 2) {
+            return null; // Não permite que o usuário marque mais de 2 entradas no mesmo dia
+        }else {
+            return repository.save(registro);
         }
     }
 
     public Registro marcarSaida(Long usuarioId) {
+        LocalDateTime registroExato = LocalDateTime.now();
         Usuario user = usuarioRepository.findById(usuarioId).orElse(null);
         assert user != null;
         Registro ultimoRegistro = user.getRegistroDePontos().getLast();
 
         if (!Objects.nonNull(ultimoRegistro.getSaida())) { // Retorna verdadeiro se a saída do usuário estiver vazia
-            ultimoRegistro.setSaida(LocalDateTime.now());
+            ultimoRegistro.setSaida(registroExato);
             return repository.save(ultimoRegistro);
         }
 
@@ -140,7 +110,6 @@ public class RegistroService {
     private void atualizarRegistroDePonto(Registro registro, Registro novosDados) {
         registro.setEntrada(novosDados.getEntrada());
         registro.setSaida(novosDados.getSaida());
-        registro.setTurno(retornarTurno(registro.getEntrada()));
     }
 
     private List<Registro> registrosPorPeriodo(List<Registro> registroDePontos, LocalDate dataInicial, LocalDate dataFinal) {
@@ -158,4 +127,5 @@ public class RegistroService {
                 }).filter(Objects::nonNull)
                 .toList();
     }
+
 }

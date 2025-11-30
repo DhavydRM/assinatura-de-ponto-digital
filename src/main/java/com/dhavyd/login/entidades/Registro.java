@@ -20,14 +20,10 @@ public class Registro {
     private LocalDateTime entrada;
     private LocalDateTime saida;
 
-    @Enumerated(EnumType.STRING)
-    private Turnos turno;
-
-    public Registro(LocalDateTime entrada, Usuario usuario, Long id, Turnos turno) {
+    public Registro(LocalDateTime entrada, Usuario usuario, Long id) {
         this.entrada = entrada;
         this.usuario = usuario;
         this.id = id;
-        this.turno = turno;
     }
 
     public Registro(Long id, Usuario usuario, LocalDateTime entrada, LocalDateTime saida, Turnos turno) {
@@ -35,7 +31,6 @@ public class Registro {
         this.usuario = usuario;
         this.entrada = entrada;
         this.saida = saida;
-        this.turno = turno;
     }
 
     public Registro() {
@@ -72,14 +67,6 @@ public class Registro {
 
     public void setEntrada(LocalDateTime entrada) {
         this.entrada = entrada;
-    }
-
-    public Turnos getTurno() {
-        return turno;
-    }
-
-    public void setTurno(Turnos turno) {
-        this.turno = turno;
     }
 
     @Override
